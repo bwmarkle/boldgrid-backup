@@ -737,6 +737,7 @@ class Boldgrid_Backup_Admin_Utility {
 					$db_prefix,
 					$old_siteurl,
 					$new_siteurl,
+                    $old_siteurl
 				)
 			)
 		);

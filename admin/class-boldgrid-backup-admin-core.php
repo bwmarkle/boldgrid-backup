@@ -1012,6 +1012,11 @@ class Boldgrid_Backup_Admin_Core {
 
 		$this->set_time_limit();
 
+		/**
+		 *
+		 */
+		do_action( 'boldgrid_backup_pre_import_dump', $db_dump_filepath );
+
 		$importer = new Boldgrid_Backup_Admin_Db_Import();
 		$status = $importer->import( $db_dump_filepath );
 
@@ -1019,6 +1024,7 @@ class Boldgrid_Backup_Admin_Core {
 			do_action( 'boldgrid_backup_notice', $status['error'], 'notice notice-error is-dismissible' );
 			return false;
 		}
+
 
 		// Set the database prefix, if supplied/changed.
 		if ( ! empty( $db_prefix ) ) {
@@ -1034,7 +1040,10 @@ class Boldgrid_Backup_Admin_Core {
 
 		// Get the restored "siteurl" and "home".
 		$restored_wp_siteurl = get_option( 'siteurl' );
+		$restored_wp_siteurl = apply_filters( 'boldgrid_backup_restored_wp_siteurl', $restored_wp_siteurl );
 		$restored_wp_home = get_option( 'home' );
+		$restored_wp_home = apply_filters( 'boldgrid_backup_restored_wp_home', $restored_wp_home );
+
 
 		// If changed, then update the siteurl in the database.
 		if ( $restored_wp_siteurl !== $wp_siteurl ) {
@@ -1800,7 +1809,9 @@ class Boldgrid_Backup_Admin_Core {
 		$pcl_zip = new Boldgrid_Backup_Admin_Compressor_Pcl_Zip( $this );
 		$sqls = $pcl_zip->get_sqls( $filepath );
 		if( 1 === count( $sqls ) ) {
-			return ABSPATH . $sqls[0];
+			$dump_file = ABSPATH . $sqls[0];
+			$dump_file = apply_filters( 'boldgrid_backup_restore_dump_file', $sqls[0] );
+			return $dump_file;
 		}
 
 		// Initialize $db_dump_filepath.
@@ -1855,6 +1866,9 @@ class Boldgrid_Backup_Admin_Core {
 	 */
 	public function restore_archive_file( $dryrun = false ) {
 		$restore_ok = true;
+
+		$restore_to = ABSPATH;
+		$restore_to = apply_filters( 'boldgrid_backup_restore_to', $restore_to );
 
 		// If a restoration was not requested, then abort.
 		if ( empty( $_POST['restore_now'] ) ) {
@@ -1952,7 +1966,7 @@ class Boldgrid_Backup_Admin_Core {
 		 */
 		do_action( 'boldgrid_backup_pre_restore', $info );
 
-		$unzip_status = ! $dryrun ? unzip_file( $info['filepath'], ABSPATH ) : null;
+		$unzip_status = ! $dryrun ? unzip_file( $info['filepath'], $restore_to ) : null;
 
 		if( is_wp_error( $unzip_status ) ) {
 			$error = false;

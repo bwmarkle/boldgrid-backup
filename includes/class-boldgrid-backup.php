@@ -390,7 +390,12 @@ class Boldgrid_Backup {
 		// Styles and Scripts for FTP settings page.
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin_core->ftp->page, 'enqueue_scripts' );
 
-		$this->loader->add_action( 'admin_notices', $plugin_admin_core->go_pro, 'admin_notice_setup' );
+		// "Upgrade to premium" notices. Notice class instantiated to trigger required hooks.
+		$notice_class = '\Boldgrid\Library\Library\Notice';
+		if ( class_exists( $notice_class ) ) {
+			new $notice_class( 'Static Notice' );
+			$this->loader->add_action( 'admin_notices', $plugin_admin_core->go_pro, 'admin_notice_setup' );
+		}
 
 		$this->loader->add_action( 'boldgrid_backup_pre_dump', $plugin_admin_core->in_progress, 'pre_dump' );
 		$this->loader->add_action( 'boldgrid_backup_post_dump', $plugin_admin_core->in_progress, 'post_dump' );

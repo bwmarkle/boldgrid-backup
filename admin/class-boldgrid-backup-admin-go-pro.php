@@ -66,10 +66,6 @@ class Boldgrid_Backup_Admin_Go_Pro {
 			return;
 		}
 
-		if ( ! class_exists( '\Boldgrid\Library\Library\Notice' ) ) {
-			return;
-		}
-
 		$is_premium = $this->core->config->get_is_premium();
 
 		$notices = array(
